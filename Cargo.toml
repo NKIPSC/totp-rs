@@ -4,3 +4,11 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+sha1 = { version = "0.10", optional = true }
+sha2 = { version = "0.10", optional = true }
+hmac = "0.12"
+
+[features]
+sha1 = ["dep:sha1"]
+sha2 = ["dep:sha2"]
+default = ["sha1", "sha2"]
