@@ -8,10 +8,24 @@ pub type Sha256 = sha2::Sha256;
 #[cfg(feature = "sha2")]
 pub type Sha512 = sha2::Sha512;
 
-pub fn generate<D: EagerHash>(key: &[u8], time: u64, time_step: u64, digits: u8) -> String {
-    if !(1..=8).contains(&digits) {
-        panic!("Number of digits must be between 1 and 8");
-    }
+#[repr(transparent)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct Digits(u8);
+
+#[derive(Debug)]
+pub struct InvalidDigits {
+    _private: u8,
+}
+
+pub fn generate<D: EagerHash>(
+    key: &[u8],
+    time: u64,
+    time_step: u64,
+    digits: impl TryInto<Digits>,
+) -> String {
+    let Ok(digits) = digits.try_into() else {
+        panic!("digits outside 1..10 range aren't allowed");
+    };
 
     let mut hmac = Hmac::<D>::new_from_slice(key).unwrap();
 
@@ -26,8 +40,43 @@ pub fn generate<D: EagerHash>(key: &[u8], time: u64, time_step: u64, digits: u8)
         | ((hmac[offset + 2] as u32) << 8)
         | hmac[offset + 3] as u32;
 
-    let otp = binary % 10u32.pow(digits as u32);
-    format!("{:0>digits$}", otp, digits = digits as usize)
+    let otp = binary % 10u32.pow(digits.0 as u32);
+    format!("{:0>digits$}", otp, digits = digits.0 as usize)
+}
+
+impl Digits {
+    pub const SIX: Digits = Digits(6);
+    pub const SEVEN: Digits = Digits(7);
+    pub const EIGHT: Digits = Digits(8);
+
+    pub fn arbitrary(digits: u8) -> Option<Digits> {
+        Some(match digits {
+            6 => Digits::SIX,
+            7 => Digits::SEVEN,
+            8 => Digits::EIGHT,
+
+            //While not explicitly allowed by the spec, the algorithm does
+            //work with any value between 1 and 9 digits. Other quantities
+            //would panic anyway when trying to generate the TOTP.
+            d @ 1..10 => Digits(d),
+
+            _ => return None,
+        })
+    }
+}
+
+impl TryFrom<u8> for Digits {
+    type Error = InvalidDigits;
+
+    fn try_from(value: u8) -> Result<Self, Self::Error> {
+        Digits::arbitrary(value).ok_or(InvalidDigits { _private: value })
+    }
+}
+
+impl From<Digits> for u8 {
+    fn from(value: Digits) -> Self {
+        value.0
+    }
 }
 
 //Tests based on samples from https://www.rfc-editor.org/rfc/rfc6238
