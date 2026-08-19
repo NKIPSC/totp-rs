@@ -1,12 +1,4 @@
-use hmac::{
-    Hmac,
-    digest::{
-        HashMarker, Mac,
-        block_buffer::Eager,
-        core_api::{BlockSizeUser, BufferKindUser, CoreProxy, FixedOutputCore, UpdateCore},
-        typenum::{IsLess, Le, NonZero, U256},
-    },
-};
+use hmac::{EagerHash, Hmac, KeyInit, Mac};
 
 #[cfg(feature = "sha1")]
 pub type Sha1 = sha1::Sha1;
@@ -16,20 +8,7 @@ pub type Sha256 = sha2::Sha256;
 #[cfg(feature = "sha2")]
 pub type Sha512 = sha2::Sha512;
 
-//Hmac trait bound:
-//https://github.com/RustCrypto/MACs/issues/114#issuecomment-1076984899
-pub fn generate<D>(key: &[u8], time: u64, time_step: u64, digits: u8) -> String
-where
-    D: CoreProxy,
-    D::Core: HashMarker
-        + UpdateCore
-        + FixedOutputCore
-        + BufferKindUser<BufferKind = Eager>
-        + Default
-        + Clone,
-    <D::Core as BlockSizeUser>::BlockSize: IsLess<U256>,
-    Le<<D::Core as BlockSizeUser>::BlockSize, U256>: NonZero,
-{
+pub fn generate<D: EagerHash>(key: &[u8], time: u64, time_step: u64, digits: u8) -> String {
     if !(1..=8).contains(&digits) {
         panic!("Number of digits must be between 1 and 8");
     }
