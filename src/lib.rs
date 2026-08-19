@@ -118,17 +118,11 @@ impl From<Digits> for u8 {
 }
 
 //Tests based on samples from https://www.rfc-editor.org/rfc/rfc6238
-#[cfg(test)]
-mod test {
-    use sha1::Sha1;
-    use sha2::{Sha256, Sha512};
-
-    use crate::generate;
+#[cfg(all(test, feature = "sha1"))]
+mod test_sha1 {
+    use crate::{Sha1, generate};
 
     const KEY_SHA1: &[u8] = b"12345678901234567890";
-    const KEY_SHA256: &[u8] = b"12345678901234567890123456789012";
-    const KEY_SHA512: &[u8] = b"1234567890123456789012345678901234567890123456789012345678901234";
-
     const TIME_STEP: u64 = 30;
 
     #[test]
@@ -155,6 +149,17 @@ mod test {
             "65353130"
         );
     }
+}
+
+//Tests based on samples from https://www.rfc-editor.org/rfc/rfc6238
+#[cfg(all(test, feature = "sha2"))]
+mod test_sha2 {
+    use crate::{Sha256, Sha512, generate};
+
+    const KEY_SHA256: &[u8] = b"12345678901234567890123456789012";
+    const KEY_SHA512: &[u8] = b"1234567890123456789012345678901234567890123456789012345678901234";
+
+    const TIME_STEP: u64 = 30;
 
     #[test]
     fn sha256() {
