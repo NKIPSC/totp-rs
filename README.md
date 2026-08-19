@@ -26,7 +26,7 @@ fn main() {
 ```
 
 ### Generate a TOTP (SHA256)
-Requires feature `sha2` (enabled by default).
+Requires feature `sha2`.
 
 ```rust
 use totp_rs::Sha256;

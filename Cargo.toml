@@ -12,4 +12,4 @@ hmac = "0.13"
 [features]
 sha1 = ["dep:sha1"]
 sha2 = ["dep:sha2"]
-default = ["sha1", "sha2"]
+default = ["sha1"]
