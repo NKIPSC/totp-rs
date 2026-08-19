@@ -8,15 +8,41 @@ pub type Sha256 = sha2::Sha256;
 #[cfg(feature = "sha2")]
 pub type Sha512 = sha2::Sha512;
 
+/// Checked number of digits to generate a TOTP (1..=9).
 #[repr(transparent)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Digits(u8);
 
+/// Represents an invalid number of digits when a conversion
+/// via [`TryFrom`] or [`TryInto`] fails.
+///
+/// # Examples
+/// ```rust
+/// use totp_rs::{Digits, InvalidDigits};
+///
+/// let valid_digits: Result<Digits, InvalidDigits> = 8u8.try_into();
+/// assert!(valid_digits.is_ok());
+///
+/// let invalid_digits: Result<Digits, InvalidDigits> = 0u8.try_into();
+/// assert!(invalid_digits.is_err());
+/// ```
 #[derive(Debug)]
 pub struct InvalidDigits {
     _private: u8,
 }
 
+/// Generates a new TOTP.
+///
+/// # Examples
+/// ```rust
+/// use totp_rs::{generate, Sha1};
+///
+/// let totp = generate::<Sha1>(b"12345678901234567890", 1787135783, 30, 6);
+/// assert_eq!(totp, "352139");
+/// ```
+///
+/// # Panics
+/// Panics if the conversion from `digits` into [`Digits`] fails.
 pub fn generate<D: EagerHash>(
     key: &[u8],
     time: u64,
@@ -49,6 +75,18 @@ impl Digits {
     pub const SEVEN: Digits = Digits(7);
     pub const EIGHT: Digits = Digits(8);
 
+    /// Constructs [`Digits`] from an arbitrary number of digits ([`u8`]).
+    ///
+    /// # Examples
+    /// ```rust
+    /// use totp_rs::Digits;
+    ///
+    /// let valid_range = Digits::arbitrary(6);
+    /// assert_ne!(valid_range, None);
+    ///
+    /// let invalid_range = Digits::arbitrary(12);
+    /// assert_eq!(invalid_range, None);
+    /// ```
     pub fn arbitrary(digits: u8) -> Option<Digits> {
         Some(match digits {
             6 => Digits::SIX,
