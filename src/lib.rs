@@ -71,8 +71,43 @@ pub fn generate<D: EagerHash>(
 }
 
 impl Digits {
+    /// Generates a TOTP with six digits.
+    /// This is equivalent to calling `Digits::arbitrary(6)`, but
+    /// it avoids bounds-checking at runtime.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use totp_rs::{Digits, Sha1};
+    ///
+    /// let totp = totp_rs::generate::<Sha1>(b"12345678901234567890", 1787165427, 30, Digits::SIX);
+    /// assert_eq!(totp, "936650");
+    /// ```
     pub const SIX: Digits = Digits(6);
+
+    /// Generates a TOTP with seven digits.
+    /// This is equivalent to calling `Digits::arbitrary(7)`, but
+    /// it avoids bounds-checking at runtime.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use totp_rs::{Digits, Sha1};
+    ///
+    /// let totp = totp_rs::generate::<Sha1>(b"12345678901234567890", 1787165427, 30, Digits::SEVEN);
+    /// assert_eq!(totp, "1936650");
+    /// ```
     pub const SEVEN: Digits = Digits(7);
+
+    /// Generates a TOTP with eight digits.
+    /// This is equivalent to calling `Digits::arbitrary(8)`, but
+    /// it avoids bounds-checking at runtime.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use totp_rs::{Digits, Sha1};
+    ///
+    /// let totp = totp_rs::generate::<Sha1>(b"12345678901234567890", 1787165427, 30, Digits::EIGHT);
+    /// assert_eq!(totp, "51936650");
+    /// ```
     pub const EIGHT: Digits = Digits(8);
 
     /// Constructs [`Digits`] from an arbitrary number of digits ([`u8`]).
