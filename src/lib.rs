@@ -122,7 +122,7 @@ impl Digits {
     /// let invalid_range = Digits::arbitrary(12);
     /// assert_eq!(invalid_range, None);
     /// ```
-    pub fn arbitrary(digits: u8) -> Option<Digits> {
+    pub const fn arbitrary(digits: u8) -> Option<Digits> {
         Some(match digits {
             6 => Digits::SIX,
             7 => Digits::SEVEN,
